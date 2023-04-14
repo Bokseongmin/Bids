@@ -168,7 +168,7 @@
                 url: "/sign/up",
                 data: data,
                 success: function(result) {
-                    console.log(data);
+                    window.location.href = "/sign/in";
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);

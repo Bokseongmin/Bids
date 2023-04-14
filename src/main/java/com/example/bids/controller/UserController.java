@@ -13,18 +13,5 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
-@RequiredArgsConstructor
-@RequestMapping("/my")
-@Controller
 public class UserController {
-
-    @GetMapping("/profile")
-    public String get_profile() {
-        return "/pages/my/profile";
-    }
-
-    @GetMapping("/manage")
-    public String get_manage() {
-        return "/pages/my/manage";
-    }
 }

@@ -21,12 +21,12 @@ public class Category {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_idx")
+    @JoinColumn(name = "parent")
     private Category parent;
 
     @OneToMany (mappedBy = "parent", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Category> subCategory = new ArrayList<>();
+    private List<Category> children = new ArrayList<>();
 
     private int level;
 }

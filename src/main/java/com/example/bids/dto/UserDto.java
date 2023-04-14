@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 public class UserDto implements DateListener {
 
     private Long idx;
-
     private String userName;
     private String email;
     private String userPw;
+    private String phoneNo;
     private String addrCode;
     private String addr1;
     private String addr2;
     private String addr3;
-    private String phoneNo;
+    private String userImg;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -27,13 +27,14 @@ public class User implements DateListener {
     @Column(nullable = false)
     private String userPw;
     @Column(nullable = false)
+    private String phoneNo;
+    @Column(nullable = false)
     private String addrCode;
     @Column(nullable = false)
     private String addr1;
     private String addr2;
     private String addr3;
-    @Column(nullable = false)
-    private String phoneNo;
+    private String userImg;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

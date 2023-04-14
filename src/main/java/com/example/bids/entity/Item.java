@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @EntityListeners(value = { LibraryEntityListener.class })
-public class Item {
+public class Item implements DateListener {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
@@ -44,6 +44,7 @@ public class Item {
 
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT '판매 중'")
+    private LocalDateTime updatedAt;
+
     private String status;
 }

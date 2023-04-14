@@ -140,7 +140,13 @@
                             }
                         </script>
                     </div>
-                    <div id="errorMsg"></div>
+                    <div class="mb-3 align-content-center">
+                        <label for="userImg" class="form-label">현재</label>
+                        <img class="mb-3" th:src="${session.user.userImg} ? ${session.user.userImg} : '/image/none-p.png'">
+                        <label class="form-label">수정후</label>
+                        <img class="mb-3" id="userImg_thumb" src="">
+                        <input type="file" class="form-control" id="userImg">
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">수정 완료</button>
                 </form>
             </div>
@@ -163,6 +169,15 @@
                 $("#userPwResult").removeClass("text-success").addClass("text-danger");
                 $("#signUpBtn").attr("disabled", "disabled");
             }
+        }
+    });
+    $("#userImg").change(function () {
+        if(this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (data) {
+                $("#userImg_thumb").attr("src", data.target.result).width(64);
+            }
+            reader.readAsDataURL(this.files[0]);
         }
     });
 </script>

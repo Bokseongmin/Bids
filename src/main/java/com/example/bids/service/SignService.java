@@ -43,6 +43,10 @@ public class SignService {
         return null;
     }
 
+    public User getEntity(UserDto userDto) {
+        return dtoToEntity(userDto);
+    }
+
     private UserDto entityToDto(User user) {
         var dto = UserDto.builder()
                 .userName(user.getUserName())

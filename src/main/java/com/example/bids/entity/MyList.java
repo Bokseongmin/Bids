@@ -1,35 +1,26 @@
 package com.example.bids.entity;
 
-import com.example.bids.entity.listener.DateListener;
 import com.example.bids.entity.listener.LibraryEntityListener;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
+@Data
+@Entity
+@Builder
 @EntityListeners(value = { LibraryEntityListener.class })
-public class Bid {
-
+public class MyList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id")
-    private User buyer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
-
-    @Column(nullable = false)
-    private int price;
-
-    private LocalDateTime CreatedAt;
-    private LocalDateTime EndedAt;
 }

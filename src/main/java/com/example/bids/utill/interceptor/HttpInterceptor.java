@@ -16,7 +16,7 @@ public class HttpInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
-        log.info(">>> 인터셉터 요청 전");
+//        log.info(">>> 인터셉터 요청 전");
         HttpSession session = req.getSession();
         UserDto userDto = (UserDto) session.getAttribute("user");
         if(userDto == null) {
@@ -28,11 +28,11 @@ public class HttpInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public void postHandle(HttpServletRequest req, HttpServletResponse res, Object handler, ModelAndView modelAndView) throws Exception {
-        log.info(">>> 인터셉터 요청 후");
+//        log.info(">>> 인터셉터 요청 후");
     }
 
     @Override
     public void afterCompletion(HttpServletRequest req, HttpServletResponse res, Object handler, Exception ex) throws Exception {
-        log.info(">>> 인터셉터 처리 후");
+//        log.info(">>> 인터셉터 처리 후");
     }
 }

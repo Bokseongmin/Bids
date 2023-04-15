@@ -19,29 +19,58 @@
         <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
             <h1 class="display-4 fw-normal">인기 품목</h1>
             <p class="fs-5 text-muted">입찰에 참여한 인원 수가 많은 품목들을 나열합니다.</p>
+            <p class="fs-5 text-muted" id="current-time"></p>
         </div>
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-            <div class="col" th:each="i : ${#numbers.sequence(1,5)}">
-                <div class="card h-100">
-                    <img src="/image/none-i.png" class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${i} + 번째">물품</h5>
-                        <p class="card-text" th:text="${i} + 번째">설명</p>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">시작가</li>
-                        <li class="list-group-item">참여자</li>
-                        <li class="list-group-item">남은 시간</li>
-                    </ul>
-                    <div class="card-body">
-                        <a href="#" class="card-link">참여</a>
-                        <a href="#" class="card-link">정보</a>
-                    </div>
-                </div>
-            </div>
+        <div id="topBid">
         </div>
     </main>
     <div th:replace="/fragments/footer.html :: fragment-footer"></div>
 </div>
+<script>
+    $(function () {
+        setInterval(function () {
+            var now = new Date();
+            var hours = now.getHours();
+            var min = now.getMinutes();
+            var sec = now.getSeconds();
+            var timeString = hours.toString().padStart(2, '0') + ':' + min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+            $('#current-time').text(timeString);
+        }, 1000);
+
+        $.ajax({
+            type: "GET",
+            url: "/bid/main",
+            success: function (response) {
+                var _item = response;
+                var html = "<div class=\"row row-cols-1 row-cols-md-4 g-4\">"
+                for (var i = 0; i < _item.length; i++) {
+                    html += "<div class='col'>";
+                    html += "<div class='card h-100'>";
+                    html += "<img src='/image/none-i.png' class='card-img-top' alt='...'>";
+                    html += "<div class='card-body'>";
+                    html += "<h5 class='card-title'>" + _item[i].item.title + "</h5>"
+                    html += "<p class='card-text'>" + _item[i].item.description + "</p>"
+                    html += "</div>";
+                    html += "<ul class='list-group list-group-flush'>";
+                    html += "<li class='list-group-item'>판매자 : " + _item[i].item.sellerId + "</li>";
+                    html += "<li class='list-group-item'>시작가 : " + _item[i].item.startPrice + "</li>";
+                    html += "<li class='list-group-item'>종료 : " + _item[i].endedAt + "</li>";
+                    html += "</ul>";
+                    html += "<div class='card-body'>"
+                    html += "<a href='#' class='card-link'>참여</a>";
+                    html += "<a href='#' class='card-link'>정보</a>";
+                    html += "</div>";
+                    html += "</div>";
+                    html += "</div>";
+                }
+                html += "</div>";
+                $("#topBid").html(html);
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+</script>
 </body>
 </html>

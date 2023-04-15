@@ -6,10 +6,12 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter
-@Setter
 @Entity
+@Builder
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(value = { LibraryEntityListener.class })
@@ -19,17 +21,22 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private String title;
+
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
-    private User buyer;
+    private List<User> buyer = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @Column(nullable = false)
-    private int price;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "confirm_user_id")
+    private User confirmUser;
 
-    private LocalDateTime CreatedAt;
-    private LocalDateTime EndedAt;
+    private int confirmPrice;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime endedAt;
 }

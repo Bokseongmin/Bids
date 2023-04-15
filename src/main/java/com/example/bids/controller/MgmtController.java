@@ -5,6 +5,7 @@ import com.example.bids.dto.ItemDto;
 import com.example.bids.entity.Category;
 import com.example.bids.entity.User;
 import com.example.bids.entity.UserDto;
+import com.example.bids.service.BidService;
 import com.example.bids.service.MgmtService;
 import com.example.bids.service.SignService;
 import com.example.bids.service.UserService;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class MgmtController {
 
     private final MgmtService mgmtService;
-    private final SignService signService;
+    private final BidService bidService;
 
     @GetMapping("/profile")
     public String get_profile() {
@@ -55,8 +56,9 @@ public class MgmtController {
 
     @PostMapping("/list/start")
     @ResponseBody
-    public void post_start(String query) {
-        System.out.println(query);
+    public void post_start(@RequestParam Map<String, String> data, HttpSession session) {
+        UserDto userDto = (UserDto) session.getAttribute("user");
+        bidService.start(data, userDto);
     }
 
 

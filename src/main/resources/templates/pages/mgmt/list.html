@@ -55,13 +55,27 @@
                 var html = ""
                 for(var i = 0; i < _item.length; i++) {
                     html += "<tr class='align-content-center text-center'>";
-                    html +="<td><img src='https://via.placeholder.com/150' class='img-fluid'></td>";
-                    html +="<td>" + _item[i].title + "</td>"
-                    html +="<td>" + _item[i].description + "</td>"
-                    html +="<td>" + _item[i].startPrice + "</td>"
-                    html +="<td>" + _item[i].createdAt + "</td>"
-                    html +="<td><button type='button' class='btn btn-primary' id='startBtn' value='\"" + _item[i].idx + "\"'>시작</button>"
-                    html +="<button type='button' class='btn btn-danger' id='deleteBtn' value='\"" + _item[i].idx + "\"'>삭제</button></td>"
+                    html += "<td><img src='https://via.placeholder.com/150' class='img-fluid'></td>";
+                    html += "<td>" + _item[i].title + "</td>"
+                    html += "<td>" + _item[i].description + "</td>"
+                    html += "<td>" + _item[i].startPrice + "</td>"
+                    html += "<td>" + _item[i].createdAt + "</td>"
+                    html += "<td><button type='button' class='btn btn-primary' id='startBtn' value='\"" + _item[i].idx + "\"' data-index='" + _item[i].idx + "' disabled>시작</button>"
+                    html += "<button type='button' class='btn btn-danger' id='deleteBtn' value='\"" + _item[i].idx + "\"' data-index='" + _item[i].idx + "\"'>삭제</button>";
+                    html += "<select id='hourSelect' data-index='" + _item[i].idx + "'>";
+                    for (var j = 0; j < 24; j++) {
+                        var hour = ("0" + j).slice(-2);
+                        html += "<option value='" + hour + "'>" + hour + "</option>";
+                    }
+                    html += "</select>";
+
+                    html += "<select id='minSelect' data-index='" + _item[i].idx + "'>";
+                    for (var k = 0; k < 2; k++) {
+                        var min = ("0" + k * 30).slice(-2);
+                        html += "<option value='" + min + "'>" + min + "</option>";
+                    }
+                    html += "</select>";
+                    html += "</td>"
                     html +="</tr>";
                 }
                 $("#getList").html(html);
@@ -75,18 +89,37 @@
                     var num = parseInt($(this).val().replace(/"/g, ""));
                     deleteItem(num);
                 });
+
+                $('#hourSelect, #minSelect').change(function() {
+                    var idx = $(this).data("index");
+                    var hour = $("#hourSelect[data-index='" + idx + "'] option:selected").val();
+                    var min = $("#minSelect[data-index='" + idx + "'] option:selected").val();
+                    if (hour == "00" && min == "00") {
+                         $("#startBtn[data-index='" + idx).prop("disabled", true).val();
+                    } else {
+                         $("#startBtn[data-index='" + idx).prop("disabled", false).val();
+                    }
+                });
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText);
             }
         });
+
         function startItem(num) {
+            var hour = $("#hourSelect").val();
+            var min = $("#minSelect").val();
+            var data = {
+                "num" : num,
+                "hour" : hour,
+                "min" : min,
+            }
             $.ajax({
                 url: "/mgmt/list/start",
                 type: "POST",
-                data: {query: num},
+                data: data,
                 success: function (response) {
-                    console.log("삭제 완료");
+                    console.log("등록 완료");
                     document.location.reload();
                 },
                 error: function (error) {

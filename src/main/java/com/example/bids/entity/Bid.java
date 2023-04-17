@@ -23,9 +23,7 @@ public class Bid {
 
     private String title;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id")
-    private List<User> buyer = new ArrayList<>();
+    private int buyerCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")

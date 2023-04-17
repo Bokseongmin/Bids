@@ -89,7 +89,7 @@ public class Converter {
     public Bid bid_dtoToEntity(BidDto bidDto) {
         Bid bid = Bid.builder()
                 .idx(bidDto.getIdx())
-                .buyer(bidDto.getBuyer())
+                .buyerCount(bidDto.getBuyerCount())
                 .item(bidDto.getItem())
                 .confirmUser(bidDto.getConfirmUser())
                 .createdAt(bidDto.getCreatedAt())
@@ -101,7 +101,7 @@ public class Converter {
     public BidDto bid_entityToDto(Bid bid) {
         BidDto bidDto = BidDto.builder()
                 .idx(bid.getIdx())
-                .buyer(bid.getBuyer())
+                .buyerCount(bid.getBuyerCount())
                 .item(bid.getItem())
                 .confirmUser(bid.getConfirmUser())
                 .createdAt(bid.getCreatedAt())

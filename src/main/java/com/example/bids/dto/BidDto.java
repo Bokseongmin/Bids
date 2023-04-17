@@ -1,5 +1,6 @@
 package com.example.bids.dto;
 
+import com.example.bids.entity.Buyer;
 import com.example.bids.entity.Category;
 import com.example.bids.entity.Item;
 import com.example.bids.entity.User;
@@ -21,7 +22,7 @@ import java.util.List;
 @Builder
 public class BidDto {
     private Long idx;
-    private List<User> buyer = new ArrayList<>();
+    private int buyerCount;
 
     private Item item;
     private User confirmUser;

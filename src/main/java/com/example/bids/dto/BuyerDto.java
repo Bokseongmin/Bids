@@ -1,6 +1,7 @@
 package com.example.bids.dto;
 
 import com.example.bids.entity.Bid;
+import com.example.bids.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
 @Builder
 public class BuyerDto {
     private Long id;
-    private String name;
+    private User user;
     private List<Long> bidIds;
+    private int price;
 }

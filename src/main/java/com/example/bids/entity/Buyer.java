@@ -17,12 +17,13 @@ public class Buyer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id")
+    private User user;
 
-    @OneToMany(mappedBy = "buyer")
-    private List<Bid> bids = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bid_id")
+    private Bid bid;
 
-    public Buyer(String name) {
-        this.name = name;
-    }
+    private int price;
 }

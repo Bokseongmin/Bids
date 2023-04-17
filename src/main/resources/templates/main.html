@@ -28,15 +28,6 @@
 </div>
 <script>
     $(function () {
-        setInterval(function () {
-            var now = new Date();
-            var hours = now.getHours();
-            var min = now.getMinutes();
-            var sec = now.getSeconds();
-            var timeString = hours.toString().padStart(2, '0') + ':' + min.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
-            $('#current-time').text(timeString);
-        }, 1000);
-
         $.ajax({
             type: "GET",
             url: "/bid/main",
@@ -44,7 +35,7 @@
                 var _item = response;
                 var html = "<div class=\"row row-cols-1 row-cols-md-4 g-4\">"
                 for (var i = 0; i < _item.length; i++) {
-                    html += "<div class='col'>";
+                    html += "<div class='col' id='item-" + i + "'>";
                     html += "<div class='card h-100'>";
                     html += "<img src='/image/none-i.png' class='card-img-top' alt='...'>";
                     html += "<div class='card-body'>";
@@ -52,19 +43,37 @@
                     html += "<p class='card-text'>" + _item[i].item.description + "</p>"
                     html += "</div>";
                     html += "<ul class='list-group list-group-flush'>";
-                    html += "<li class='list-group-item'>판매자 : " + _item[i].item.sellerId + "</li>";
+                    html += "<li class='list-group-item'>판매자 : " + _item[i].item.seller.userName + "</li>";
                     html += "<li class='list-group-item'>시작가 : " + _item[i].item.startPrice + "</li>";
-                    html += "<li class='list-group-item'>종료 : " + _item[i].endedAt + "</li>";
+                    html += "<li class='list-group-item' data-time='" + _item[i].endedAt + "'>" + _item[i].endedAt + "</li>";
                     html += "</ul>";
                     html += "<div class='card-body'>"
                     html += "<a href='#' class='card-link'>참여</a>";
-                    html += "<a href='#' class='card-link'>정보</a>";
+                    html += "<a href='/bid/info?idx=" + _item[i].idx + "' class='card-link'>정보</a>";;
                     html += "</div>";
                     html += "</div>";
                     html += "</div>";
                 }
                 html += "</div>";
                 $("#topBid").html(html);
+
+                setInterval(function () {
+                    for (var i = 0; i < _item.length; i++) {
+                        var endTime = new Date($("#item-" + i + " > div > ul > li:nth-child(3)").data("time"));
+                        console.log(endTime);
+                        var now = new Date();
+                        var diff = endTime - now;
+                        if(diff > 0) {
+                            var hours = Math.floor(diff / (1000 * 60 * 60));
+                            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                            var time = hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                            $("#item-" + i + " > div > ul > li:nth-child(3)").text("남은 시간: " + time);
+                        } else {
+                            $("#item-" + i + " > div > ul > li:nth-child(3)").text("종료");
+                        }
+                    }
+                }, 1000);
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText);

@@ -40,7 +40,7 @@
             <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
                data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="/image/none-p.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                <p class="text-black d-inline-block ml-2" th:text="${session.user} ? ${session.user.userName} : '계정 정보가 없습니다.'"></p>
+                <p class="text-black d-inline-block ml-2" th:if="${session.user}"></p>
             </a>
             <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
                 <div th:if="${session.user == null}">

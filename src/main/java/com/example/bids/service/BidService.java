@@ -4,18 +4,19 @@ import com.example.bids.dto.BidDto;
 import com.example.bids.dto.BuyerDto;
 import com.example.bids.dto.CategoryDto;
 import com.example.bids.dto.ItemDto;
-import com.example.bids.entity.Bid;
-import com.example.bids.entity.Item;
-import com.example.bids.entity.User;
+import com.example.bids.entity.*;
 import com.example.bids.entity.UserDto;
 import com.example.bids.repository.BidRepository;
+import com.example.bids.repository.BuyerRepository;
 import com.example.bids.repository.ItemRepository;
 import com.example.bids.repository.UserRepository;
 import com.example.bids.utill.Converter;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.asm.Advice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -30,6 +31,10 @@ public class BidService {
     private final BidRepository bidRepository;
 
     private final ItemRepository itemRepository;
+
+    private final UserRepository userRepository;
+
+    private final BuyerRepository buyerRepository;
 
     private final Converter converter;
 
@@ -73,9 +78,10 @@ public class BidService {
     public List<BidDto> main() {
         List<Bid> bids = bidRepository.findTop4ByOrderByBuyerCountDesc();
         List<BidDto> bidDtos = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < bids.size(); i++) {
             Optional<Item> item = itemRepository.findById(bids.get(i).getItem().getIdx());
-            if(item.isPresent()) {
+            if (item.isPresent()) {
                 User seller = item.get().getSeller();
                 BidDto bidDto = BidDto.builder()
                         .idx(bids.get(i).getIdx())
@@ -99,7 +105,11 @@ public class BidService {
                                 .build())
                         .endedAt(bids.get(i).getEndedAt())
                         .build();
-                bidDtos.add(bidDto);
+                if (now.compareTo(bidDto.getEndedAt()) > 0) {
+                    bidRepository.delete(converter.bid_dtoToEntity(bidDto));
+                } else {
+                    bidDtos.add(bidDto);
+                }
             }
         }
         return bidDtos;
@@ -111,7 +121,7 @@ public class BidService {
         BidDto bidDto = null;
         if (bid.isPresent()) {
             Optional<Item> item = itemRepository.findById(bid.get().getItem().getIdx());
-            if(item.isPresent()) {
+            if (item.isPresent()) {
                 User seller = item.get().getSeller();
                 bidDto = BidDto.builder()
                         .idx(bid.get().getIdx())
@@ -140,10 +150,47 @@ public class BidService {
     }
 
     @Transactional
-    public void sendBuyer(Map<String, String> data) {
+    public void sendBuyer(Map<String, String> data, UserDto userDto) {
         Optional<Bid> bid = bidRepository.findById(Long.valueOf(data.get("idx")));
-        if(bid.isPresent()) {
+        Optional<User> user = userRepository.findById(userDto.getIdx());
+        Optional<Item> item = itemRepository.findById(bid.get().getItem().getIdx());
+        if (bid.isPresent() && item.isPresent()) {
+            User seller = item.get().getSeller();
+            if (user.isPresent()) {
+                BuyerDto buyerDto = BuyerDto.builder()
+                        .user(User.builder()
+                                .email(userDto.getEmail())
+                                .userName(userDto.getUserName())
+                                .idx(userDto.getIdx())
+                                .userImg(userDto.getUserImg())
+                                .build())
+                        .bid(Bid.builder()
+                                .idx(bid.get().getIdx())
+                                .item(Item.builder()
+                                        .idx(item.get().getIdx())
+                                        .seller(User.builder()
+                                                .idx(seller.getIdx())
+                                                .userName(seller.getUserName())
+                                                .userImg(seller.getUserImg())
+                                                .createdAt(seller.getCreatedAt())
+                                                .build())
+                                        .title(item.get().getTitle())
+                                        .description(item.get().getDescription())
+                                        .imageUrl(item.get().getImageUrl())
+                                        .status(item.get().getStatus())
+                                        .createdAt(item.get().getCreatedAt())
+                                        .build())
+                                .buyerCount(bid.get().getBuyerCount() + 1)
+                                .endedAt(bid.get().getEndedAt())
+                                .build())
+                        .price(Integer.parseInt(data.get("sendPrice")))
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                System.out.println(buyerDto.toString());
+                buyerRepository.save(converter.buyer_dtoToEntity(buyerDto));
+            } else {
 
+            }
         }
     }
 }

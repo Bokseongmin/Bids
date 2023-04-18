@@ -1,6 +1,7 @@
 package com.example.bids.utill;
 
 import com.example.bids.dto.BidDto;
+import com.example.bids.dto.BuyerDto;
 import com.example.bids.dto.CategoryDto;
 import com.example.bids.dto.ItemDto;
 import com.example.bids.entity.*;
@@ -108,5 +109,28 @@ public class Converter {
                 .endedAt(bid.getEndedAt())
                 .build();
         return bidDto;
+    }
+
+    public Buyer buyer_dtoToEntity(BuyerDto buyerDto) {
+        Buyer buyer = Buyer.builder()
+                .idx(buyerDto.getIdx())
+                .user(buyerDto.getUser())
+                .bid(buyerDto.getBid())
+                .price(buyerDto.getPrice())
+                .createdAt(buyerDto.getCreatedAt())
+                .build();
+        return buyer;
+    }
+
+    public BuyerDto buyerDto_entityToDto(Buyer buyer) {
+        BuyerDto buyerDto = BuyerDto.builder()
+                .idx(buyer.getIdx())
+                .user(buyer.getUser())
+                .bid(buyer.getBid())
+                .price(buyer.getPrice())
+                .createdAt(buyer.getCreatedAt())
+                .build();
+
+        return buyerDto;
     }
 }

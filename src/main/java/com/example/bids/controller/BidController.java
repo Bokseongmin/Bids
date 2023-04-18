@@ -1,6 +1,7 @@
 package com.example.bids.controller;
 
 import com.example.bids.dto.BidDto;
+import com.example.bids.entity.UserDto;
 import com.example.bids.service.BidService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +27,6 @@ public class BidController {
     @GetMapping("/main")
     public ResponseEntity get_main() {
         List<BidDto> bidDtos = bidService.main();
-        System.out.println(bidDtos.toString());
         return ResponseEntity.ok().body(bidDtos);
     }
 
@@ -35,8 +37,9 @@ public class BidController {
         return "pages/info";
     }
     @PostMapping("/info")
-    public String post_info(@RequestParam Map<String, String> data) {
-        bidService.sendBuyer(data);
+    public String post_info(@RequestParam Map<String, String> data, HttpSession session) {
+        UserDto user = (UserDto) session.getAttribute("user");
+        bidService.sendBuyer(data, user);
         return "redirect:/bid/info?idx=" + data.get("idx");
     }
 }

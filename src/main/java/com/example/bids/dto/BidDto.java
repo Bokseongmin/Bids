@@ -28,6 +28,7 @@ public class BidDto {
     private User confirmUser;
 
     private int confirmPrice;
+
     private LocalDateTime createdAt;
     private LocalDateTime endedAt;
 }

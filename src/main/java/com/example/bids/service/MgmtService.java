@@ -1,25 +1,23 @@
 package com.example.bids.service;
 
+import com.example.bids.dto.BidDto;
+import com.example.bids.dto.BuyerDto;
 import com.example.bids.dto.CategoryDto;
 import com.example.bids.dto.ItemDto;
-import com.example.bids.dto.MyListDto;
 import com.example.bids.entity.*;
 import com.example.bids.entity.UserDto;
-import com.example.bids.repository.CategoryRepository;
-import com.example.bids.repository.ItemRepository;
-import com.example.bids.repository.UserRepository;
+import com.example.bids.repository.*;
 import com.example.bids.utill.Converter;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
-import org.hibernate.proxy.HibernateProxy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +27,10 @@ public class MgmtService {
     private final UserRepository userRepository;
 
     private final CategoryRepository categoryRepository;
+
+    private final BidRepository bidRepository;
+
+    private final BuyerRepository buyerRepository;
 
     private final Converter converter;
 
@@ -51,19 +53,87 @@ public class MgmtService {
 
     @Transactional
     public List<ItemDto> get_myList(UserDto userDto) {
-        Optional<User> user = userRepository.findByEmail(userDto.getEmail());
+        Optional<User> user = userRepository.findById(userDto.getIdx());
         List<ItemDto> itemDtos = new ArrayList<>();
         if(user.isPresent()) {
             List<Item> items = itemRepository.findItemsBySeller(user.get()).orElseGet(()-> null);
             for(Item item : items) {
-                CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
-                categoryDto.setChildren(categoryDto.getChildren());
-                ItemDto itemDto = converter.item_entityToDto(item);
-                itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
-                itemDtos.add(itemDto);
+                Optional<Bid> bid = bidRepository.findByItemIdx(item.getIdx());
+                if(bid.isEmpty()) {
+                    CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                    categoryDto.setChildren(categoryDto.getChildren());
+                    ItemDto itemDto = converter.item_entityToDto(item);
+                    itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
+                    itemDtos.add(itemDto);
+                }
             }
         }
         return itemDtos;
+    }
+
+    @Transactional
+    public List<BidDto> get_myBid(UserDto userDto) {
+        Optional<User> user = userRepository.findById(userDto.getIdx());
+        List<BidDto> bidDtos = new ArrayList<>();
+        if(user.isPresent()) {
+            Optional<List<Bid>> bids = bidRepository.findByItemSellerIdx(user.get().getIdx());
+            if(bids.isPresent()) {
+                for(Bid bid : bids.get()) {
+                    Optional<Integer> maxPrice = buyerRepository.findMaxBuyerCountByIdx(bid.getIdx());
+                    Item item = (Item) Hibernate.unproxy(bid.getItem());
+
+                    CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                    categoryDto.setChildren(categoryDto.getChildren());
+
+                    item.setCategory(converter.category_dtoToEntity(categoryDto));
+
+                    BidDto bidDto = converter.bid_entityToDto(bid);
+                    bidDto.setConfirmPrice(maxPrice.get());
+                    bidDto.setItem(item);
+                    bidDtos.add(bidDto);
+                }
+            }
+        }
+        return bidDtos;
+    }
+
+    @Transactional
+    public List<BuyerDto> get_Buyer(Long data) {
+        List<BuyerDto> buyerDtos = new ArrayList<>();
+        Optional<List<Buyer>> buyers = buyerRepository.findByBidIdx(data);
+        if(buyers.isPresent()) {
+            for(Buyer buyer : buyers.get()) {
+                BuyerDto buyerDto = BuyerDto.builder()
+                        .idx(buyer.getIdx())
+                        .user(buyer.getUser())
+                        .bid(buyer.getBid())
+                        .price(buyer.getPrice())
+                        .createdAt(buyer.getCreatedAt())
+                        .build();
+                buyerDtos.add(buyerDto);
+            }
+        }
+        System.out.println(buyerDtos);
+        return buyerDtos;
+    }
+
+    @Transactional
+    public void confirm_buy(Long idx, String userName) {
+        Optional<Bid> bid = Optional.of(bidRepository.getById(idx));
+        System.out.println("bid 정보 : " + bid.get().toString());
+        Optional<User> user = userRepository.findByUserName(userName);
+        System.out.println("user 정보 : " + user.get().toString());
+        Optional<Buyer> buyer = buyerRepository.findByUserIdx(user.get().getIdx());
+        BidDto bidDto = null;
+        if(bid.isPresent() && user.isPresent()) {
+            bidDto = converter.bid_entityToDto(bid.get());
+            bidDto.setIdx(bid.get().getIdx());
+            bidDto.setConfirmUser(user.get());
+            bidDto.setConfirmPrice(buyer.get().getPrice());
+            bidDto.setEndedAt(LocalDateTime.now());
+            bidRepository.save(converter.bid_dtoToEntity(bidDto));
+        }
+        System.out.println(bidDto.toString());
     }
 
     @Transactional

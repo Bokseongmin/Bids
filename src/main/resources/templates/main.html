@@ -60,7 +60,6 @@
                 setInterval(function () {
                     for (var i = 0; i < _item.length; i++) {
                         var endTime = new Date($("#item-" + i + " > div > ul > li:nth-child(3)").data("time"));
-                        console.log(endTime);
                         var now = new Date();
                         var diff = endTime - now;
                         if(diff > 0) {

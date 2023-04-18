@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -14,8 +15,10 @@ import java.util.List;
 @Data
 @Builder
 public class BuyerDto {
-    private Long id;
+    private Long idx;
     private User user;
-    private List<Long> bidIds;
+    private Bid bid;
     private int price;
+
+    private LocalDateTime createdAt;
 }

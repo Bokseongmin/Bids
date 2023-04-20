@@ -65,6 +65,7 @@ public class BidService {
         LocalDateTime enaded = LocalDateTime.of(year, month, day, hour, min, sec);
         if (item.isPresent()) {
             ItemDto itemDto = converter.item_entityToDto(item.get());
+            itemDto.setStatus(1);
             BidDto bidDto = BidDto.builder()
                     .item(converter.item_dtoToEntity(itemDto))
                     .createdAt(LocalDateTime.now())
@@ -97,11 +98,13 @@ public class BidService {
                                 .title(item.get().getTitle())
                                 .description(item.get().getDescription())
                                 .startPrice(item.get().getStartPrice())
-                                .currentPrice(item.get().getCurrentPrice())
-                                .bidCount(item.get().getBidCount())
-                                .imageUrl(item.get().getImageUrl())
+                                .confirmUser(item.get().getConfirmUser())
+                                .confirmPrice(item.get().getConfirmPrice())
+                                .itemImages(item.get().getItemImages())
                                 .status(item.get().getStatus())
                                 .createdAt(item.get().getCreatedAt())
+                                .updatedAt(item.get().getUpdatedAt())
+                                .endedAt(item.get().getEndedAt())
                                 .build())
                         .endedAt(bids.get(i).getEndedAt())
                         .build();
@@ -136,11 +139,13 @@ public class BidService {
                                 .title(item.get().getTitle())
                                 .description(item.get().getDescription())
                                 .startPrice(item.get().getStartPrice())
-                                .currentPrice(item.get().getCurrentPrice())
-                                .bidCount(item.get().getBidCount())
-                                .imageUrl(item.get().getImageUrl())
+                                .confirmUser(item.get().getConfirmUser())
+                                .confirmPrice(item.get().getConfirmPrice())
+                                .itemImages(item.get().getItemImages())
                                 .status(item.get().getStatus())
                                 .createdAt(item.get().getCreatedAt())
+                                .updatedAt(item.get().getUpdatedAt())
+                                .endedAt(item.get().getEndedAt())
                                 .build())
                         .endedAt(bid.get().getEndedAt())
                         .build();
@@ -157,32 +162,13 @@ public class BidService {
         if (bid.isPresent() && item.isPresent()) {
             User seller = item.get().getSeller();
             if (user.isPresent()) {
+                ItemDto itemDto = converter.item_entityToDto(item.get());
+                itemDto.setSeller(seller);
+                BidDto bidDto = converter.bid_entityToDto(bid.get());
+                bidDto.setItem(converter.item_dtoToEntity(itemDto));
                 BuyerDto buyerDto = BuyerDto.builder()
-                        .user(User.builder()
-                                .email(userDto.getEmail())
-                                .userName(userDto.getUserName())
-                                .idx(userDto.getIdx())
-                                .userImg(userDto.getUserImg())
-                                .build())
-                        .bid(Bid.builder()
-                                .idx(bid.get().getIdx())
-                                .item(Item.builder()
-                                        .idx(item.get().getIdx())
-                                        .seller(User.builder()
-                                                .idx(seller.getIdx())
-                                                .userName(seller.getUserName())
-                                                .userImg(seller.getUserImg())
-                                                .createdAt(seller.getCreatedAt())
-                                                .build())
-                                        .title(item.get().getTitle())
-                                        .description(item.get().getDescription())
-                                        .imageUrl(item.get().getImageUrl())
-                                        .status(item.get().getStatus())
-                                        .createdAt(item.get().getCreatedAt())
-                                        .build())
-                                .buyerCount(bid.get().getBuyerCount() + 1)
-                                .endedAt(bid.get().getEndedAt())
-                                .build())
+                        .user(converter.user_dtoToEntity(userDto))
+                        .bid(converter.bid_dtoToEntity(bidDto))
                         .price(Integer.parseInt(data.get("sendPrice")))
                         .createdAt(LocalDateTime.now())
                         .build();

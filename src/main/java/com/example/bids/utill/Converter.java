@@ -45,7 +45,13 @@ public class Converter {
                 .description(item.getDescription())
                 .category(item.getCategory())
                 .startPrice(item.getStartPrice())
-                .imageUrl(item.getImageUrl())
+                .itemImages(item.getItemImages())
+                .confirmPrice(item.getConfirmPrice())
+                .confirmUser(item.getConfirmUser())
+                .status(item.getStatus())
+                .updatedAt(item.getUpdatedAt())
+                .endedAt(item.getEndedAt())
+                .createdAt(item.getCreatedAt())
                 .build();
         return dto;
     }
@@ -58,7 +64,13 @@ public class Converter {
                 .description(itemDto.getDescription())
                 .category(itemDto.getCategory())
                 .startPrice(itemDto.getStartPrice())
-                .imageUrl(itemDto.getImageUrl())
+                .itemImages(itemDto.getItemImages())
+                .confirmUser(itemDto.getConfirmUser())
+                .confirmPrice(itemDto.getConfirmPrice())
+                .endedAt(itemDto.getEndedAt())
+                .status(itemDto.getStatus())
+                .createdAt(itemDto.getCreatedAt())
+                .updatedAt(itemDto.getUpdatedAt())
                 .build();
         return entity;
     }
@@ -92,7 +104,7 @@ public class Converter {
                 .idx(bidDto.getIdx())
                 .buyerCount(bidDto.getBuyerCount())
                 .item(bidDto.getItem())
-                .confirmUser(bidDto.getConfirmUser())
+                .price(bidDto.getPrice())
                 .createdAt(bidDto.getCreatedAt())
                 .endedAt(bidDto.getEndedAt())
                 .build();
@@ -104,7 +116,7 @@ public class Converter {
                 .idx(bid.getIdx())
                 .buyerCount(bid.getBuyerCount())
                 .item(bid.getItem())
-                .confirmUser(bid.getConfirmUser())
+                .price(bid.getPrice())
                 .createdAt(bid.getCreatedAt())
                 .endedAt(bid.getEndedAt())
                 .build();

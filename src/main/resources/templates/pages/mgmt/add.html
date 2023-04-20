@@ -94,7 +94,8 @@
                         <div class="mb-3">
                             <label for="parent" class="form-label">대분류</label>
                             <select class="form-select" id="parent">
-                                <option th:each="data : ${category}" th:if="${data.level == 0}" th:value="${data.idx}" th:text="${data.name}"></option>
+                                <option th:each="data : ${category}" th:if="${data.level == 0}" th:value="${data.idx}"
+                                        th:text="${data.name}"></option>
                             </select>
                             <label for="subCategory" class="form-label">소분류</label>
                             <select class="form-select" id="subCategory">
@@ -114,7 +115,7 @@
                         <div class="mb-3">
                             <label for="startPrice" class="form-label">시작가</label>
                             <input type="text" class="form-control" id="startPrice" name="startPrice"
-                                   placeholder="을 입력하세요"
+                                   placeholder="시작가를 입력하세요"
                                    required="required">
                         </div>
                         <div class="mb-3">
@@ -124,51 +125,21 @@
                         </div>
                         <div class="mb-3">
                             <label for="imageUrl" class="form-label">이미지</label>
-                            <input type="text" class="form-control" id="imageUrl" name="imageUrl"
-                                   placeholder="제목을 입력하세요"
-                                   required="required">
+                            <input type="file" class="form-control" id="imageUrl" name="imageUrl" multiple>
                         </div>
                         <button id="addBtn" type="submit" class="btn btn-primary w-100">등록</button>
                     </form>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-8">
-                    <swiper-container style="--swiper-navigation-color: #fff; --swiper-pagination-color: #fff"
+                    <swiper-container id="mySwiper1"
+                                      style="--swiper-navigation-color: #fff; --swiper-pagination-color: #fff"
                                       class="mySwiper" thumbs-swiper=".mySwiper2" space-between="10"
                                       navigation="true">
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-1.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-2.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-3.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-4.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-5.jpg"/>
-                        </swiper-slide>
                     </swiper-container>
 
-                    <swiper-container class="mySwiper2" space-between="10" slides-per-view="4" free-mode="true"
+                    <swiper-container id="mySwiper2" class="mySwiper2" space-between="10" slides-per-view="4"
+                                      free-mode="true"
                                       watch-slides-progress="true">
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-1.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-2.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-3.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-4.jpg"/>
-                        </swiper-slide>
-                        <swiper-slide>
-                            <img src="https://swiperjs.com/demos/images/nature-5.jpg"/>
-                        </swiper-slide>
                     </swiper-container>
                 </div>
             </div>
@@ -184,7 +155,7 @@
             console.log(select.data("sub"));
             $("#subCategory").empty().append('<option>전체</option>');
             $.each(category, function (i, category) {
-                if(category.level == 1 && category.parentName == parentName) {
+                if (category.level == 1 && category.parentName == parentName) {
                     $("#subCategory").append('<option value="' + category.name + '">' + category.name + '</option>');
                 }
             });
@@ -199,6 +170,12 @@
 
                 if (name) {
                     data[name] = value;
+
+                    if (name === "imageUrl" && value) {
+                        data["isImages"] = 1;
+                    } else {
+                        data["isImages"] = 2;
+                    }
                 }
             });
             $.ajax({
@@ -213,6 +190,22 @@
                     console.error(xhr.responseText);
                 }
             });
+        });
+        $("#imageUrl").change(function () {
+            if (this.files && this.files[0]) {
+                var html = "";
+                for (var i = 0; i < this.files.length; i++) {
+                    var reader = new FileReader;
+                    reader.onload = function (data) {
+                        html += "<swiper-slide>";
+                        html += "<img src='"+ data.target.result +"'/>";
+                        html += "</swiper-slide>";
+                        $("#mySwiper1").html(html);
+                        $("#mySwiper2").html(html);
+                    }
+                    reader.readAsDataURL(this.files[i]);
+                }
+            }
         });
     });
 </script>

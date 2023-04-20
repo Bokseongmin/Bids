@@ -6,9 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,17 +37,23 @@ public class Item implements DateListener {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    private String imageUrl;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Image> itemImages = new ArrayList<>();
 
     private int startPrice;
 
-    private int currentPrice;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "confirm_id")
+    private User confirmUser;
 
-    private int bidCount;
+    private int confirmPrice;
+
+    @ColumnDefault("0")
+    private int status;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    private String status;
+    private LocalDateTime endedAt;
 }

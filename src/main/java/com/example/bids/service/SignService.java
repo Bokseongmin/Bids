@@ -44,8 +44,4 @@ public class SignService {
         }
         return null;
     }
-
-    public User getEntity(UserDto userDto) {
-        return converter.user_dtoToEntity(userDto);
-    }
 }

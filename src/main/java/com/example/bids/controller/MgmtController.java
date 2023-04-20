@@ -102,4 +102,22 @@ public class MgmtController {
         mgmtService.add(data);
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
+
+    @GetMapping("/t_history")
+    public String get_t_hhistory() {
+        return "pages/mgmt/t_history";
+    }
+
+    @GetMapping("/t_history/get")
+    @ResponseBody
+    public ResponseEntity get_historyGet(HttpSession session) {
+        UserDto userDto = (UserDto) session.getAttribute("user");
+        List<ItemDto> itemDtos = mgmtService.history(userDto);
+        return ResponseEntity.ok(itemDtos);
+    }
+
+    @GetMapping("/b_history")
+    public String get_b_history() {
+        return "pages/mgmt/b_history";
+    }
 }

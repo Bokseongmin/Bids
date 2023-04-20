@@ -37,14 +37,14 @@ public class MgmtService {
     public void add(Map<String, String> data) {
         Optional<User> user = userRepository.findByUserName(data.get("seller"));
         Optional<Category> category = categoryRepository.findByName("휴대폰");
-        if(user.isPresent() && category.isPresent()) {
+        if (user.isPresent() && category.isPresent()) {
             ItemDto itemDto = ItemDto.builder()
                     .title(data.get("title"))
                     .seller(user.get())
                     .description(data.get("description"))
                     .category(category.get())
                     .startPrice(Integer.parseInt(data.get("startPrice")))
-                    .imageUrl(data.get("imageUrl"))
+                    .itemImages(null)
                     .build();
 
             itemRepository.save(converter.item_dtoToEntity(itemDto));
@@ -55,14 +55,15 @@ public class MgmtService {
     public List<ItemDto> get_myList(UserDto userDto) {
         Optional<User> user = userRepository.findById(userDto.getIdx());
         List<ItemDto> itemDtos = new ArrayList<>();
-        if(user.isPresent()) {
-            List<Item> items = itemRepository.findItemsBySeller(user.get()).orElseGet(()-> null);
-            for(Item item : items) {
+        if (user.isPresent()) {
+            List<Item> items = itemRepository.findItemsBySeller(user.get()).orElseGet(() -> null);
+            for (Item item : items) {
                 Optional<Bid> bid = bidRepository.findByItemIdx(item.getIdx());
-                if(bid.isEmpty()) {
+                if (bid.isEmpty()) {
                     CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
                     categoryDto.setChildren(categoryDto.getChildren());
                     ItemDto itemDto = converter.item_entityToDto(item);
+                    itemDto.setConfirmUser(new User());
                     itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
                     itemDtos.add(itemDto);
                 }
@@ -75,20 +76,21 @@ public class MgmtService {
     public List<BidDto> get_myBid(UserDto userDto) {
         Optional<User> user = userRepository.findById(userDto.getIdx());
         List<BidDto> bidDtos = new ArrayList<>();
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             Optional<List<Bid>> bids = bidRepository.findByItemSellerIdx(user.get().getIdx());
-            if(bids.isPresent()) {
-                for(Bid bid : bids.get()) {
+            if (bids.isPresent()) {
+                for (Bid bid : bids.get()) {
                     Optional<Integer> maxPrice = buyerRepository.findMaxBuyerCountByIdx(bid.getIdx());
+                    if(!maxPrice.isPresent()) {
+                        maxPrice = Optional.of(bid.getItem().getStartPrice());
+                    }
                     Item item = (Item) Hibernate.unproxy(bid.getItem());
-
+                    item.setConfirmUser(null);
                     CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
                     categoryDto.setChildren(categoryDto.getChildren());
-
                     item.setCategory(converter.category_dtoToEntity(categoryDto));
-
                     BidDto bidDto = converter.bid_entityToDto(bid);
-                    bidDto.setConfirmPrice(maxPrice.get());
+                    bidDto.setPrice(maxPrice.get());
                     bidDto.setItem(item);
                     bidDtos.add(bidDto);
                 }
@@ -101,8 +103,8 @@ public class MgmtService {
     public List<BuyerDto> get_Buyer(Long data) {
         List<BuyerDto> buyerDtos = new ArrayList<>();
         Optional<List<Buyer>> buyers = buyerRepository.findByBidIdx(data);
-        if(buyers.isPresent()) {
-            for(Buyer buyer : buyers.get()) {
+        if (buyers.isPresent()) {
+            for (Buyer buyer : buyers.get()) {
                 BuyerDto buyerDto = BuyerDto.builder()
                         .idx(buyer.getIdx())
                         .user(buyer.getUser())
@@ -120,20 +122,39 @@ public class MgmtService {
     @Transactional
     public void confirm_buy(Long idx, String userName) {
         Optional<Bid> bid = Optional.of(bidRepository.getById(idx));
-        System.out.println("bid 정보 : " + bid.get().toString());
         Optional<User> user = userRepository.findByUserName(userName);
-        System.out.println("user 정보 : " + user.get().toString());
         Optional<Buyer> buyer = buyerRepository.findByUserIdx(user.get().getIdx());
-        BidDto bidDto = null;
-        if(bid.isPresent() && user.isPresent()) {
-            bidDto = converter.bid_entityToDto(bid.get());
-            bidDto.setIdx(bid.get().getIdx());
-            bidDto.setConfirmUser(user.get());
-            bidDto.setConfirmPrice(buyer.get().getPrice());
-            bidDto.setEndedAt(LocalDateTime.now());
-            bidRepository.save(converter.bid_dtoToEntity(bidDto));
+        ItemDto itemDto = null;
+        if (bid.isPresent() && user.isPresent()) {
+            itemDto = converter.item_entityToDto(bid.get().getItem());
+            itemDto.setConfirmUser(buyer.get().getUser());
+            itemDto.setConfirmPrice(buyer.get().getPrice());
+            itemDto.setEndedAt(LocalDateTime.now());
+            itemDto.setStatus(2);
+            itemRepository.save(converter.item_dtoToEntity(itemDto));
+            buyerRepository.delete(buyer.get());
+            bidRepository.delete(bid.get());
         }
-        System.out.println(bidDto.toString());
+    }
+
+    @Transactional
+    public List<ItemDto> history(UserDto userDto) {
+        List<ItemDto> itemDtos = new ArrayList<>();
+        Optional<List<Item>> items = itemRepository.findItemsBySeller(converter.user_dtoToEntity(userDto));
+        if (items.isPresent()) {
+            for (Item item : items.get()) {
+                if(item.getConfirmUser() != null) {
+                    ItemDto itemDto = converter.item_entityToDto(item);
+                    UserDto confirmUser = converter.user_entityToDto(item.getConfirmUser());
+                    CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                    itemDto.setConfirmUser(converter.user_dtoToEntity(confirmUser));
+                    itemDto.setSeller(converter.user_dtoToEntity(userDto));
+                    itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
+                    itemDtos.add(itemDto);
+                }
+            }
+        }
+        return itemDtos;
     }
 
     @Transactional

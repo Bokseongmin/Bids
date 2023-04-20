@@ -27,6 +27,7 @@ public class BidDto {
     private Item item;
     private User confirmUser;
 
+    private int price;
     private int confirmPrice;
 
     private LocalDateTime createdAt;

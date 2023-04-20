@@ -33,6 +33,7 @@ public class Bid {
     @JoinColumn(name = "confirm_user_id")
     private User confirmUser;
 
+    private int price;
     private int confirmPrice;
 
     private LocalDateTime createdAt;

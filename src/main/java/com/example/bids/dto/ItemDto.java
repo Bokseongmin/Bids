@@ -1,6 +1,7 @@
 package com.example.bids.dto;
 
 import com.example.bids.entity.Category;
+import com.example.bids.entity.Image;
 import com.example.bids.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,13 +31,19 @@ public class ItemDto {
 
     private int startPrice;
 
-    private int currentPrice;
+    private User confirmUser;
+
+    private int confirmPrice;
 
     private int bidCount;
 
-    private String imageUrl;
+    private List<Image> itemImages = new ArrayList<>();
 
-    private String status;
+    private int status;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    private LocalDateTime endedAt;
 }

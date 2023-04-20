@@ -60,7 +60,7 @@
                     html += "<td>" + _item[i].item.title + "</td>"
                     html += "<td>" + _item[i].item.description + "</td>"
                     html += "<td>" + _item[i].item.startPrice + "</td>"
-                    html += "<td><a href='/mgmt/buyer?bid=" + _item[i].idx + "'>" + _item[i].confirmPrice + "</a></td>"
+                    html += "<td><a href='/mgmt/buyer?bid=" + _item[i].idx + "'>" + _item[i].price + "</a></td>"
                     html += "<td data-time='" + _item[i].endedAt + "'>" + _item[i].createdAt + "</td>"
                     html += "<td><button type='button' class='btn btn-primary' id='startBtn' value='\"" + _item[i].idx + "\"' data-index='" + _item[i].idx + "'>종료</button>"
                     html += "</td>"

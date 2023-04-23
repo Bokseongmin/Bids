@@ -75,7 +75,7 @@
     </style>
 </head>
 <body>
-<div class="container">
+<div>
     <div th:replace="/fragments/header.html :: fragment-header"></div>
     <div class="row">
         <div th:replace="pages/mgmt/fragments/nav.html :: fragment-nav"></div>
@@ -85,7 +85,7 @@
             </div>
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-8">
-                    <form id="addProduct">
+                    <form id="addItem">
                         <div class="mb-3">
                             <label for="title" class="form-label">제목</label>
                             <input type="text" class="form-control" id="title" name="title" placeholder="제목을 입력하세요"
@@ -97,8 +97,8 @@
                                 <option th:each="data : ${category}" th:if="${data.level == 0}" th:value="${data.idx}"
                                         th:text="${data.name}"></option>
                             </select>
-                            <label for="subCategory" class="form-label">소분류</label>
-                            <select class="form-select" id="subCategory">
+                            <label for="children" class="form-label">소분류</label>
+                            <select class="form-select" id="children">
                                 <option>전체</option>
                             </select>
                         </div>
@@ -124,8 +124,9 @@
                                    th:value="대기중">
                         </div>
                         <div class="mb-3">
-                            <label for="imageUrl" class="form-label">이미지</label>
-                            <input type="file" class="form-control" id="imageUrl" name="imageUrl" multiple>
+                            <label for="itemImage" class="form-label">이미지</label>
+                            <input type="file" class="form-control" id="itemImage" name="itemImage" accept=".jpg, .png"
+                                   multiple>
                         </div>
                         <button id="addBtn" type="submit" class="btn btn-primary w-100">등록</button>
                     </form>
@@ -149,20 +150,39 @@
 <div th:replace="/fragments/footer.html :: fragment-footer"></div>
 <script>
     $(function () {
+        var parentIdx;
+        var childrenIdx;
         $("#parent").change(function () {
-            var parentName = $(this).val();
-            var select = $('#parent option:selected');
-            console.log(select.data("sub"));
-            $("#subCategory").empty().append('<option>전체</option>');
-            $.each(category, function (i, category) {
-                if (category.level == 1 && category.parentName == parentName) {
-                    $("#subCategory").append('<option value="' + category.name + '">' + category.name + '</option>');
+            parentIdx = $(this).val();
+            var data = {
+                parentIdx: parentIdx
+            }
+            var html = "";
+            $.ajax({
+                type: "GET",
+                url: "/mgmt/add/category",
+                data: data,
+                success: function (response) {
+                    var _category = response;
+                    for (var i = 0; i < _category.length; i++) {
+                        if (_category[i].level == 1) {
+                            html += "<option value='" + _category[i].idx + "'>" + _category[i].name + "</option>";
+                        }
+                    }
+                    $("#children").html(html);
+
+                    $("#children").change(function () {
+                        childrenIdx = $(this).val();
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
                 }
             });
         });
-        $("#addProduct").submit(function (e) {
+        $("#addItem").submit(function (e) {
             e.preventDefault();
-
+            var formData = new FormData();
             var data = {};
             $(this).find("input").each(function () {
                 var name = $(this).attr("name");
@@ -170,19 +190,29 @@
 
                 if (name) {
                     data[name] = value;
-
-                    if (name === "imageUrl" && value) {
-                        data["isImages"] = 1;
-                    } else {
-                        data["isImages"] = 2;
-                    }
                 }
             });
+            data["parentIdx"] = parentIdx;
+            data["childrenIdx"] = childrenIdx;
+            var fileInput = $("#itemImage");
+            for (var i = 0; i < fileInput.length; i++) {
+                if (fileInput[i].files.length > 0) {
+                    for (var j = 0; j < fileInput[i].files.length; j++) {
+                        console.log(" fileInput[i].files[j] :::" + fileInput[i].files[j]);
+
+                        formData.append("file", $("#itemImage")[i].files[j]);
+                    }
+                }
+            }
+            formData.append("key", new Blob([JSON.stringify(data)], {type: "application/json"}));
             $.ajax({
                 type: "POST",
                 url: "/mgmt/add",
-                data: data,
-                success: function (result) {
+                enctype: "multipart/form-data",
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
                     alert("등록완료");
                     window.location.href = "/mgmt/add";
                 },
@@ -191,14 +221,14 @@
                 }
             });
         });
-        $("#imageUrl").change(function () {
+        $("#itemImage").change(function () {
             if (this.files && this.files[0]) {
                 var html = "";
                 for (var i = 0; i < this.files.length; i++) {
                     var reader = new FileReader;
                     reader.onload = function (data) {
                         html += "<swiper-slide>";
-                        html += "<img src='"+ data.target.result +"'/>";
+                        html += "<img src='" + data.target.result + "'/>";
                         html += "</swiper-slide>";
                         $("#mySwiper1").html(html);
                         $("#mySwiper2").html(html);

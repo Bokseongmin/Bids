@@ -1,61 +1,50 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
-<header class="navbar navbar-expand-md navbar-dark bd-navbar border-bottom" th:fragment="fragment-header">
-    <div class="container-xxl flex-wrap flex-md-nowrap">
-        <a href="/" class="navbar-brand p-0 me-2 text-black">
-            <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
-
-            </svg>
-            온비드
-        </a>
-        <div class="collapse navbar-collapse d-flex justify-content-center">
-            <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                    <a href="/" class="nav-link link-dark p-2">홈</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                    <a href="/list" class="nav-link link-dark p-2">목록</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                    <a href="/bid" class="nav-link link-dark p-2">입찰</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                    <a href="/notice" class="nav-link link-dark p-2">게시판</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav pt-2 py-md-0">
-                <li class="nav-item col-6 col-md-auto">
-                    <a href="/check" class="nav-link link-dark p-2">문의</a>
-                </li>
-            </ul>
-        </div>
-        <div class="dropdown text-end">
-            <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
-               data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="/image/none-p.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                <p class="text-black d-inline-block ml-2" th:if="${session.user}" th:text="${session.user.userName}"></p>
+<header class="p-3 bg-dark text-white" th:fragment="fragment-header">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                온비드
             </a>
-            <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-                <div th:if="${session.user == null}">
-                    <li><a class="dropdown-item" href="/sign/in">로그인</a></li>
-                    <li><a class="dropdown-item" href="/sign/up">회원가입</a></li>
-                </div>
-                <div th:if="${session.user != null}">
-                    <li><a class="dropdown-item" href="/mgmt/profile">내 프로필</a></li>
-                    <li><a class="dropdown-item" href="/mgmt/dashboard">관리</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" id="signOut" type="button">로그아웃</a></li>
-                </div>
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li class="nav-item col-6 col-md-auto">
+                    <a href="/" class="nav-link px-2 text-white">홈</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                    <a href="/bids" class="nav-link px-2 text-white">입찰</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                    <a href="/list" class="nav-link px-2 text-white">목록</a>
+                </li>
+                <li class="nav-item col-6 col-md-auto">
+                    <a href="/check" class="nav-link px-2 text-white">문의</a>
+                </li>
             </ul>
+            <div class="dropdown text-end">
+                <a href="#" class="d-block link-white text-decoration-none dropdown-toggle" id="dropdownUser1"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="/image/none-p.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                    <p class="text-white d-inline-block ml-2 align-content-center justify-content-center" th:if="${session.user}"
+                       th:text="${session.user.userName}"></p>
+                </a>
+                <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
+                    <div th:if="${session.user == null}">
+                        <li><a class="dropdown-item" href="/sign/in">로그인</a></li>
+                        <li><a class="dropdown-item" href="/sign/up">회원가입</a></li>
+                    </div>
+                    <div th:if="${session.user != null}">
+                        <li><a class="dropdown-item" href="/mgmt/profile">내 프로필</a></li>
+                        <li><a class="dropdown-item" href="/mgmt/dashboard">관리</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" id="signOut" type="button">로그아웃</a>
+                        </li>
+                    </div>
+                </ul>
+            </div>
         </div>
     </div>
 </header>

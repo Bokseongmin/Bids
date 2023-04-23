@@ -13,7 +13,7 @@
     <script th:src="@{/js/header.js}" type="text/javascript"></script>
 </head>
 <body>
-<div class="container">
+<div>
     <div th:replace="/fragments/header.html :: fragment-header"></div>
     <main>
         <div class="container-fluid">
@@ -55,7 +55,13 @@
                 var html = ""
                 for(var i = 0; i < _item.length; i++) {
                     html += "<tr class='align-content-center text-center'>";
-                    html += "<td><img src='https://via.placeholder.com/150' class='img-fluid'></td>";
+                    var itemImages = _item[i].itemImages;
+                    if (itemImages.length > 0) {
+                        var storedFileName = itemImages[0].storedFileName;
+                        html += "<td><img src='../bid/" + storedFileName + "' style='height: 160px; width: 260px;' class='card-img-top' alt='...'></td>";
+                    } else {
+                        html += "<td><img src='/image/none-i.png' style='height: 160px; width: 260px;' ' class='card-img-top' alt='...'></td>";
+                    }
                     html += "<td>" + _item[i].title + "</td>"
                     html += "<td>" + _item[i].description + "</td>"
                     html += "<td>" + _item[i].startPrice + "</td>"
@@ -100,33 +106,34 @@
                          $("#startBtn[data-index='" + idx).prop("disabled", false).val();
                     }
                 });
+
+                function startItem(num) {
+                    var hour = $("#hourSelect[data-index='" + num + "'] option:selected").val();
+                    var min = $("#minSelect[data-index='" + num + "'] option:selected").val();
+                    var data = {
+                        "num" : num,
+                        "hour" : hour,
+                        "min" : min,
+                    }
+                    console.log(data)
+                    $.ajax({
+                        url: "/mgmt/list/start",
+                        type: "POST",
+                        data: data,
+                        success: function (response) {
+                            console.log("등록 완료");
+                            document.location.reload();
+                        },
+                        error: function (error) {
+                            console.log(error);
+                        }
+                    });
+                }
             },
             error: function (xhr, status, error) {
                 console.error(xhr.responseText);
             }
         });
-
-        function startItem(num) {
-            var hour = $("#hourSelect").val();
-            var min = $("#minSelect").val();
-            var data = {
-                "num" : num,
-                "hour" : hour,
-                "min" : min,
-            }
-            $.ajax({
-                url: "/mgmt/list/start",
-                type: "POST",
-                data: data,
-                success: function (response) {
-                    console.log("등록 완료");
-                    document.location.reload();
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            });
-        }
 
         function deleteItem() {
 

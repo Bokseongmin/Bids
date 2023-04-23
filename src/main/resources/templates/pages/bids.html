@@ -1,10 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Main</title>
+    <!-- CSS -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+    <!-- JS -->
+    <script th:src="@{/js/bootstrap.bundle.min.js}" type="text/javascript"></script>
+    <!-- JQuery -->
+    <script th:src="@{/js/jquery-3.6.4.min.js}" type="text/javascript"></script>
 </head>
 <body>
+<div>
+    <div th:replace="/fragments/header.html :: fragment-header"></div>
+    <main class="container">
+        <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+            <h1 class="display-4 fw-normal">진행 중</h1>
+        </div>
+        <div id="list">
+        </div>
+    </main>
+    <div th:replace="/fragments/footer.html :: fragment-footer"></div>
+</div>
+<script>
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: "/bid/bids",
+            success: function (response) {
+                var _item = response;
+                var html = "<div class=\"row row-cols-1 row-cols-md-4 g-4\">"
+                for (var i = 0; i < _item.length; i++) {
+                    html += "<div class='col' id='item-" + i + "'>";
+                    html += "<div class='card h-100'>";
+                    var itemImages = _item[i].item.itemImages;
+                    if (itemImages.length > 0) {
+                        var storedFileName = itemImages[0].storedFileName;
+                        html += "<img src='bid/" + storedFileName + "' style='height: 160px; width: 260px;' class='card-img-top' alt='...'>";
+                    } else {
+                        html += "<img src='/image/none-i.png' style='height: 160px; width: 260px;' class='card-img-top' alt='...'>";
+                    }
+                    html += "<div class='card-body'>";
+                    html += "<h5 class='card-title'>" + _item[i].item.title + "</h5>"
+                    html += "<p class='card-text'>" + _item[i].item.description + "</p>"
+                    html += "</div>";
+                    html += "<ul class='list-group list-group-flush'>";
+                    html += "<li class='list-group-item'>판매자 : " + _item[i].item.seller.userName + "</li>";
+                    html += "<li class='list-group-item'>시작가 : " + _item[i].item.startPrice + "</li>";
+                    html += "<li class='list-group-item' data-time='" + _item[i].endedAt + "'>" + _item[i].endedAt + "</li>";
+                    html += "</ul>";
+                    html += "<div class='card-body'>"
+                    html += "<a href='#' class='card-link'>참여</a>";
+                    html += "<a href='/bid/info?idx=" + _item[i].idx + "' class='card-link'>정보</a>";;
+                    html += "</div>";
+                    html += "</div>";
+                    html += "</div>";
+                }
+                html += "</div>";
+                $("#list").html(html);
 
+                setInterval(function () {
+                    for (var i = 0; i < _item.length; i++) {
+                        var endTime = new Date($("#item-" + i + " > div > ul > li:nth-child(3)").data("time"));
+                        var now = new Date();
+                        var diff = endTime - now;
+                        if(diff > 0) {
+                            var hours = Math.floor(diff / (1000 * 60 * 60));
+                            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                            var time = hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                            $("#item-" + i + " > div > ul > li:nth-child(3)").text("남은 시간: " + time);
+                        } else {
+                            $("#item-" + i + " > div > ul > li:nth-child(3)").text("종료");
+                        }
+                    }
+                }, 1000);
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+</script>
 </body>
 </html>

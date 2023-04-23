@@ -6,8 +6,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -20,13 +19,9 @@ public class Category {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent")
-    private Category parent;
+    private String code;
 
-    @OneToMany (mappedBy = "parent", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Category> children = new ArrayList<>();
+    private String codeRef;
 
     private int level;
 }

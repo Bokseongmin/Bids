@@ -1,9 +1,6 @@
 package com.example.bids.utill;
 
-import com.example.bids.dto.BidDto;
-import com.example.bids.dto.BuyerDto;
-import com.example.bids.dto.CategoryDto;
-import com.example.bids.dto.ItemDto;
+import com.example.bids.dto.*;
 import com.example.bids.entity.*;
 import com.example.bids.entity.UserDto;
 import org.springframework.context.annotation.Configuration;
@@ -79,8 +76,8 @@ public class Converter {
         CategoryDto categoryDto = CategoryDto.builder()
                 .idx(category.getIdx())
                 .name(category.getName())
-                .parent(category.getParent())
-                .children(category.getChildren())
+                .code(category.getCode())
+                .codeRef(category.getCodeRef())
                 .level(category.getLevel())
                 .build();
 
@@ -91,8 +88,8 @@ public class Converter {
         Category category = Category.builder()
                 .idx(categoryDto.getIdx())
                 .name(categoryDto.getName())
-                .parent(categoryDto.getParent())
-                .children(categoryDto.getChildren())
+                .code(categoryDto.getCode())
+                .codeRef(categoryDto.getCodeRef())
                 .level(categoryDto.getLevel())
                 .build();
 
@@ -134,7 +131,7 @@ public class Converter {
         return buyer;
     }
 
-    public BuyerDto buyerDto_entityToDto(Buyer buyer) {
+    public BuyerDto buyer_entityToDto(Buyer buyer) {
         BuyerDto buyerDto = BuyerDto.builder()
                 .idx(buyer.getIdx())
                 .user(buyer.getUser())
@@ -144,5 +141,27 @@ public class Converter {
                 .build();
 
         return buyerDto;
+    }
+
+    public Image image_dtoToEntity(ImageDto imageDto) {
+        Image image = Image.builder()
+                .idx(imageDto.getIdx())
+                .originalFileName(imageDto.getOriginalFileName())
+                .storedFileName(imageDto.getStoredFileName())
+                .createdAt(imageDto.getCreatedAt())
+                .item(imageDto.getItem())
+                .build();
+        return image;
+    }
+
+    public ImageDto image_entityToDto(Image image) {
+        ImageDto imageDto = ImageDto.builder()
+                .idx(image.getIdx())
+                .originalFileName(image.getOriginalFileName())
+                .storedFileName(image.getStoredFileName())
+                .createdAt(image.getCreatedAt())
+                .item(image.getItem())
+                .build();
+        return imageDto;
     }
 }

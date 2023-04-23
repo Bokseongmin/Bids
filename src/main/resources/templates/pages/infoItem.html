@@ -86,61 +86,48 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-8">
-                            <div id="bidInfo">
+                            <div id="itemInfo">
                                 <div class="mb-3">
-                                    <label for="Bididx" class="form-label">번호</label>
-                                    <input type="text" class="form-control" id="Bididx" name="Bididx" readonly
-                                           th:value="${bid.idx}">
+                                    <label for="itemIdx" class="form-label">번호</label>
+                                    <input type="text" class="form-control" id="itemIdx" name="itemIdx" readonly
+                                           th:value="${item.idx}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="title" class="form-label">제목</label>
                                     <input type="text" class="form-control" id="title" readonly name="title"
-                                           th:value="${bid.item.title}">
+                                           th:value="${item.title}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="parent" class="form-label">대분류</label>
                                     <select class="form-select" id="parent" disabled>
-                                        <option th:each="data : ${bid.item.category}" th:if="${data.level == 1}"
+                                        <option th:each="data : ${item.category}" th:if="${data.level == 1}"
                                                 th:value="${data.idx}" th:text="${data.codeRef}"></option>
                                     </select>
                                     <label for="subCategory" class="form-label">소분류</label>
                                     <select class="form-select" id="subCategory" disabled>
-                                        <option th:each="data : ${bid.item.category}" th:if="${data.level == 1}"
+                                        <option th:each="data : ${item.category}" th:if="${data.level == 1}"
                                                 th:value="${data.idx}" th:text="${data.name}"></option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="seller" class="form-label">판매자</label>
                                     <input type="text" class="form-control" id="seller" name="seller" readonly
-                                           th:value="${bid.item.seller.userName}">
+                                           th:value="${item.seller.userName}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="description" class="form-label">설명</label>
                                     <input type="text" class="form-control" id="description" name="description"
-                                           readonly th:value="${bid.item.description}">
+                                           readonly th:value="${item.description}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="startPrice" class="form-label">시작가</label>
                                     <input type="text" class="form-control" id="startPrice" name="startPrice" readonly
-                                           th:value="${bid.item.startPrice}">
+                                           th:value="${item.startPrice}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="status" class="form-label">상태</label>
                                     <input type="text" class="form-control" id="status" name="status" readonly
-                                           th:value="대기중">
-                                </div>
-                                <div th:if="${session.user != null}">
-                                    <form method="post" action="info">
-                                        <input id="idx" name="idx" hidden="hidden" th:value="${bid.idx}">
-                                        <div class="mb-3">
-                                            <label for="sendPrice" class="form-label">입찰 가격</label>
-                                            <input type="text" class="form-control" id="sendPrice" name="sendPrice"
-                                                   placeholder="입찰 가격을 입력하세요" required="required">
-                                        </div>
-                                        <div class="mb-3">
-                                            <input type="submit" class="form-control" value="참여">
-                                        </div>
-                                    </form>
+                                           th:value="ended">
                                 </div>
                             </div>
                         </div>
@@ -148,18 +135,18 @@
                             <swiper-container style="--swiper-navigation-color: #fff; --swiper-pagination-color: #fff"
                                               class="mySwiper" thumbs-swiper=".mySwiper2" space-between="10"
                                               navigation="true">
-                                <th:block th:each="image : ${bid.getItem().getItemImages()}">
+                                <th:block th:each="image : ${item.getItemImages()}">
                                     <swiper-slide>
-                                        <img th:src="${image.storedFileName}" />
+                                        <img th:src="${image.storedFileName}"/>
                                     </swiper-slide>
                                 </th:block>
                             </swiper-container>
 
                             <swiper-container class="mySwiper2" space-between="10" slides-per-view="4" free-mode="true"
                                               watch-slides-progress="true">
-                                <th:block th:each="image : ${bid.getItem().getItemImages()}">
+                                <th:block th:each="image : ${item.getItemImages()}">
                                     <swiper-slide>
-                                        <img th:src="${image.storedFileName}" />
+                                        <img th:src="${image.storedFileName}"/>
                                     </swiper-slide>
                                 </th:block>
                             </swiper-container>

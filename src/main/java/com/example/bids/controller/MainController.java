@@ -17,4 +17,14 @@ public class MainController {
         model.addAttribute("user", user);
         return "main";
     }
+
+    @GetMapping("/list")
+    public String list() {
+        return "pages/list";
+    }
+
+    @GetMapping("/bids")
+    public String bids() {
+        return "pages/bids";
+    }
 }

@@ -1,6 +1,8 @@
 package com.example.bids.controller;
 
 import com.example.bids.dto.BidDto;
+import com.example.bids.dto.CategoryDto;
+import com.example.bids.dto.ItemDto;
 import com.example.bids.entity.UserDto;
 import com.example.bids.service.BidService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,12 +33,32 @@ public class BidController {
         return ResponseEntity.ok().body(bidDtos);
     }
 
+    @GetMapping("/list")
+    public ResponseEntity get_list() {
+        List<ItemDto> itemDtos = bidService.list();
+        return ResponseEntity.ok().body(itemDtos);
+    }
+
+    @GetMapping("/bids")
+    public ResponseEntity get_bids() {
+        List<BidDto> bidDtos = bidService.bids();
+        return ResponseEntity.ok().body(bidDtos);
+    }
+
     @GetMapping("/info")
     public String get_info(@RequestParam("idx") String idx, Model model) {
         BidDto bidDto = bidService.info(Long.valueOf(idx));
         model.addAttribute("bid", bidDto);
         return "pages/info";
     }
+
+    @GetMapping("/infoItem")
+    public String get_infoItem(@RequestParam("idx") String idx, Model model) {
+        ItemDto itemDto = bidService.infoItem(Long.valueOf(idx));
+        model.addAttribute("item", itemDto);
+        return "pages/infoItem";
+    }
+
     @PostMapping("/info")
     public String post_info(@RequestParam Map<String, String> data, HttpSession session) {
         UserDto user = (UserDto) session.getAttribute("user");

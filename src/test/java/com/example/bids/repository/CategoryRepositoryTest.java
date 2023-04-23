@@ -14,21 +14,126 @@ class CategoryRepositoryTest {
     @Autowired
     CategoryRepository categoryRepository;
 
-//    String[] parents = {"디지털", "패션", "가구", "스포츠", "자동차", "도서"};
     @Test
     void addCategory() {
-        var parentName = "도서";
-        var subName = "외국어";
+        Category parentCategory = Category.builder()
+                .name("디지털")
+                .level(0)
+                .code("100")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory);
 
-        Category parent = categoryRepository.findByName(parentName).orElse(null);
-        if(parent == null) {
-            parent = Category.builder().name(parentName).build();
-            parent = categoryRepository.save(parent);
-            System.out.println(parent);
+        String[] childCategoryNames = {"컴퓨터", "TV", "모바일"};
+        for (int i = 0; i < childCategoryNames.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames[i])
+                    .level(1)
+                    .code(String.format("10%d", i + 2))
+                    .codeRef("100")
+                    .build();
+            categoryRepository.save(childCategory);
         }
+        categoryRepository.save(parentCategory);
 
-        var sub = Category.builder().name(subName).parent(parent).level(parent.getLevel() + 1).build();
+        Category parentCategory2 = Category.builder()
+                .name("패션")
+                .level(0)
+                .code("200")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory2);
 
-        categoryRepository.save(sub);
+        String[] childCategoryNames2 = {"모자", "상의", "하의", "신발", "악세사리"};
+        for (int i = 0; i < childCategoryNames2.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames2[i])
+                    .level(1)
+                    .code(String.format("20%d", i + 1))
+                    .codeRef("200")
+                    .build();
+            categoryRepository.save(childCategory);
+        }
+        categoryRepository.save(parentCategory2);
+
+        Category parentCategory3 = Category.builder()
+                .name("가구")
+                .level(0)
+                .code("300")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory3);
+
+        String[] childCategoryNames3 = {"침실", "거실", "주방", "수납"};
+        for (int i = 0; i < childCategoryNames3.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames3[i])
+                    .level(1)
+                    .code(String.format("30%d", i + 1))
+                    .codeRef("300")
+                    .build();
+            categoryRepository.save(childCategory);
+        }
+        categoryRepository.save(parentCategory3);
+
+        Category parentCategory4 = Category.builder()
+                .name("스포츠")
+                .level(0)
+                .code("400")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory4);
+
+        String[] childCategoryNames4 = {"축구", "야구", "농구"};
+        for (int i = 0; i < childCategoryNames4.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames4[i])
+                    .level(1)
+                    .code(String.format("40%d", i + 1))
+                    .codeRef("400")
+                    .build();
+            categoryRepository.save(childCategory);
+        }
+        categoryRepository.save(parentCategory4);
+
+        Category parentCategory5 = Category.builder()
+                .name("자동차")
+                .level(0)
+                .code("500")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory5);
+
+        String[] childCategoryNames5 = {"축구", "야구", "농구"};
+        for (int i = 0; i < childCategoryNames5.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames5[i])
+                    .level(1)
+                    .code(String.format("50%d", i + 1))
+                    .codeRef("500")
+                    .build();
+            categoryRepository.save(childCategory);
+        }
+        categoryRepository.save(parentCategory5);
+
+        Category parentCategory6 = Category.builder()
+                .name("도서")
+                .level(0)
+                .code("600")
+                .codeRef(null)
+                .build();
+        categoryRepository.save(parentCategory6);
+
+        String[] childCategoryNames6 = {"전공", "만화", "소설", "에세이"};
+        for (int i = 0; i < childCategoryNames6.length; i++) {
+            Category childCategory = Category.builder()
+                    .name(childCategoryNames6[i])
+                    .level(1)
+                    .code(String.format("60%d", i + 1))
+                    .codeRef("600")
+                    .build();
+            categoryRepository.save(childCategory);
+        }
+        categoryRepository.save(parentCategory6);
     }
 }

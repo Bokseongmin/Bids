@@ -19,14 +19,12 @@ import java.util.List;
 public class CategoryDto {
 
     private Long idx;
+
     private String name;
-    private Category parent;
 
-    private List<Category> children = new ArrayList<>();
+    private String code;
+
+    private String codeRef;
+
     private int level;
-
-    public List<Category> getChildren() {
-        Hibernate.initialize(children);
-        return children;
-    }
 }

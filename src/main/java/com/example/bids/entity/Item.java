@@ -37,7 +37,8 @@ public class Item implements DateListener {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "item_images")
     private List<Image> itemImages = new ArrayList<>();
 
     private int startPrice;

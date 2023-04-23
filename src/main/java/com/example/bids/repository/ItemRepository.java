@@ -14,6 +14,5 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<List<Item>> findItemsBySeller(User user);
 
-    @Query("SELECT i FROM Item i JOIN FETCH i.category c JOIN FETCH c.parent WHERE i.seller = :seller")
-    List<Item> findItemsBySellerWithCategory(@Param("seller") User seller);
+    Optional<List<Item>> findItemsByConfirmUser(User user);
 }

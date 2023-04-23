@@ -1,18 +1,21 @@
 package com.example.bids.service;
 
-import com.example.bids.dto.BidDto;
-import com.example.bids.dto.BuyerDto;
-import com.example.bids.dto.CategoryDto;
-import com.example.bids.dto.ItemDto;
+import com.example.bids.dto.*;
 import com.example.bids.entity.*;
 import com.example.bids.entity.UserDto;
 import com.example.bids.repository.*;
 import com.example.bids.utill.Converter;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,23 +35,89 @@ public class MgmtService {
 
     private final BuyerRepository buyerRepository;
 
+    private final ImageRepository imageRepository;
+
     private final Converter converter;
 
-    public void add(Map<String, String> data) {
-        Optional<User> user = userRepository.findByUserName(data.get("seller"));
-        Optional<Category> category = categoryRepository.findByName("휴대폰");
-        if (user.isPresent() && category.isPresent()) {
-            ItemDto itemDto = ItemDto.builder()
-                    .title(data.get("title"))
-                    .seller(user.get())
-                    .description(data.get("description"))
-                    .category(category.get())
-                    .startPrice(Integer.parseInt(data.get("startPrice")))
-                    .itemImages(null)
-                    .build();
+    private final ResourceLoader resourceLoader;
 
-            itemRepository.save(converter.item_dtoToEntity(itemDto));
+    public void add(Map<String, String> data, List<MultipartFile> itemImages) throws IOException {
+        Optional<User> user = userRepository.findByUserName(data.get("seller"));
+        Optional<Category> category = categoryRepository.findById(Long.valueOf(data.get("childrenIdx")));
+        if (user.isPresent() && category.isPresent()) {
+            if (itemImages.isEmpty()) {
+                ItemDto itemDto = ItemDto.builder()
+                        .title(data.get("title"))
+                        .seller(user.get())
+                        .description(data.get("description"))
+                        .category(category.get())
+                        .startPrice(Integer.parseInt(data.get("startPrice")))
+                        .itemImages(null)
+                        .build();
+                itemRepository.save(converter.item_dtoToEntity(itemDto));
+            } else {
+                List<Image> images = new ArrayList<>();
+                for (MultipartFile itemImage : itemImages) {
+                    String originalFileName = itemImage.getOriginalFilename();
+                    String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+                    Resource resource = resourceLoader.getResource("classpath:static");
+                    String absolutePath = resource.getFile().getAbsolutePath();
+                    String savePath = absolutePath + "\\bid\\" + storedFileName;
+
+                    itemImage.transferTo(new File(savePath));
+
+                    Image image = Image.builder()
+                            .originalFileName(originalFileName)
+                            .storedFileName(storedFileName)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    imageRepository.save(image);
+                    images.add(image);
+                }
+
+                Item item = Item.builder()
+                        .title(data.get("title"))
+                        .seller(user.get())
+                        .description(data.get("description"))
+                        .category(category.get())
+                        .startPrice(Integer.parseInt(data.get("startPrice")))
+                        .itemImages(images)
+                        .build();
+                itemRepository.save(item);
+            }
         }
+    }
+
+    @Transactional
+    public List<CategoryDto> categoryDtos() {
+        List<Category> category = categoryRepository.findAll();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+
+        for (Category getCategory : category) {
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setIdx(getCategory.getIdx());
+            categoryDto.setName(getCategory.getName());
+            categoryDto.setCode(getCategory.getCode());
+            categoryDto.setCodeRef(getCategory.getCodeRef());
+            categoryDto.setLevel(getCategory.getLevel());
+
+            categoryDtos.add(categoryDto);
+        }
+        return categoryDtos;
+    }
+
+    @Transactional
+    public List<CategoryDto> get_categoryDtoList(Long parentIdx) {
+        Optional<List<Category>> categories = categoryRepository.findByCodeRef(parentIdx);
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        if (categories.isPresent()) {
+            for (Category getCategory : categories.get()) {
+                CategoryDto categoryDto = converter.category_entityToDto(getCategory);
+                categoryDtos.add(categoryDto);
+            }
+        }
+        return categoryDtos;
     }
 
     @Transactional
@@ -61,7 +130,8 @@ public class MgmtService {
                 Optional<Bid> bid = bidRepository.findByItemIdx(item.getIdx());
                 if (bid.isEmpty()) {
                     CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
-                    categoryDto.setChildren(categoryDto.getChildren());
+                    categoryDto.setCode(categoryDto.getCode());
+                    categoryDto.setCodeRef(categoryDto.getCodeRef());
                     ItemDto itemDto = converter.item_entityToDto(item);
                     itemDto.setConfirmUser(new User());
                     itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
@@ -69,6 +139,7 @@ public class MgmtService {
                 }
             }
         }
+        System.out.println(itemDtos.toString());
         return itemDtos;
     }
 
@@ -81,16 +152,17 @@ public class MgmtService {
             if (bids.isPresent()) {
                 for (Bid bid : bids.get()) {
                     Optional<Integer> maxPrice = buyerRepository.findMaxBuyerCountByIdx(bid.getIdx());
-                    if(!maxPrice.isPresent()) {
-                        maxPrice = Optional.of(bid.getItem().getStartPrice());
-                    }
                     Item item = (Item) Hibernate.unproxy(bid.getItem());
-                    item.setConfirmUser(null);
+                    Hibernate.initialize(item.getItemImages());
+                    if (item.getItemImages() == null || item.getItemImages().isEmpty()) {
+
+                    }
                     CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
-                    categoryDto.setChildren(categoryDto.getChildren());
+                    categoryDto.setCode(categoryDto.getCode());
+                    categoryDto.setCodeRef(categoryDto.getCodeRef());
                     item.setCategory(converter.category_dtoToEntity(categoryDto));
                     BidDto bidDto = converter.bid_entityToDto(bid);
-                    bidDto.setPrice(maxPrice.get());
+                    bidDto.setPrice(maxPrice.orElse(bid.getItem().getStartPrice()));
                     bidDto.setItem(item);
                     bidDtos.add(bidDto);
                 }
@@ -123,7 +195,7 @@ public class MgmtService {
     public void confirm_buy(Long idx, String userName) {
         Optional<Bid> bid = Optional.of(bidRepository.getById(idx));
         Optional<User> user = userRepository.findByUserName(userName);
-        Optional<Buyer> buyer = buyerRepository.findByUserIdx(user.get().getIdx());
+        Optional<Buyer> buyer = buyerRepository.findByUserIdxWithBidIdx(user.get().getIdx(), bid.get().getIdx());
         ItemDto itemDto = null;
         if (bid.isPresent() && user.isPresent()) {
             itemDto = converter.item_entityToDto(bid.get().getItem());
@@ -141,12 +213,15 @@ public class MgmtService {
     public List<ItemDto> history(UserDto userDto) {
         List<ItemDto> itemDtos = new ArrayList<>();
         Optional<List<Item>> items = itemRepository.findItemsBySeller(converter.user_dtoToEntity(userDto));
+        List<Image> images = new ArrayList<>();
         if (items.isPresent()) {
             for (Item item : items.get()) {
-                if(item.getConfirmUser() != null) {
+                if (item.getConfirmUser() != null) {
+                    images = imageRepository.findByItemIdx(item.getIdx());
                     ItemDto itemDto = converter.item_entityToDto(item);
                     UserDto confirmUser = converter.user_entityToDto(item.getConfirmUser());
                     CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                    itemDto.setItemImages(images);
                     itemDto.setConfirmUser(converter.user_dtoToEntity(confirmUser));
                     itemDto.setSeller(converter.user_dtoToEntity(userDto));
                     itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
@@ -158,20 +233,26 @@ public class MgmtService {
     }
 
     @Transactional
-    public List<CategoryDto> categoryDtoList() {
-        List<Category> category = categoryRepository.findAll();
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-
-        for (Category getCategory : category) {
-            CategoryDto categoryDto = new CategoryDto();
-            categoryDto.setIdx(getCategory.getIdx());
-            categoryDto.setName(getCategory.getName());
-            categoryDto.setParent(getCategory.getParent());
-            categoryDto.setChildren(getCategory.getChildren());
-            categoryDto.setLevel(getCategory.getLevel());
-
-            categoryDtos.add(categoryDto);
+    public List<ItemDto> b_history(UserDto userDto) {
+        List<ItemDto> itemDtos = new ArrayList<>();
+        Optional<List<Item>> items = itemRepository.findItemsByConfirmUser(converter.user_dtoToEntity(userDto));
+        List<Image> images = new ArrayList<>();
+        if (items.isPresent()) {
+            for (Item item : items.get()) {
+                if (item.getConfirmUser() != null) {
+                    images = imageRepository.findByItemIdx(item.getIdx());
+                    ItemDto itemDto = converter.item_entityToDto(item);
+                    UserDto confirmUser = converter.user_entityToDto(item.getConfirmUser());
+                    UserDto sellerDto = converter.user_entityToDto(item.getSeller());
+                    CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                    itemDto.setConfirmUser(converter.user_dtoToEntity(confirmUser));
+                    itemDto.setItemImages(images);
+                    itemDto.setSeller(converter.user_dtoToEntity(sellerDto));
+                    itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
+                    itemDtos.add(itemDto);
+                }
+            }
         }
-        return categoryDtos;
+        return itemDtos;
     }
 }

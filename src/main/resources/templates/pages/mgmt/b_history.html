@@ -13,7 +13,7 @@
     <script th:src="@{/js/header.js}" type="text/javascript"></script>
 </head>
 <body>
-<div class="container">
+<div>
     <div th:replace="/fragments/header.html :: fragment-header"></div>
     <main>
         <div class="container-fluid">
@@ -29,7 +29,7 @@
                             <tr class="text-center">
                                 <th style="width: 15%">사진</th>
                                 <th style="width: 15%">제목</th>
-                                <th style="width: 35%">구매자</th>
+                                <th style="width: 35%">판매자</th>
                                 <th style="width: 10%">확정가</th>
                                 <th style="width: 10%">거래일</th>
                                 <th style="width: 15%">등록</th>
@@ -57,7 +57,7 @@
                     html += "<tr class='align-content-center text-center'>";
                     html += "<td><img src='https://via.placeholder.com/150' class='img-fluid'></td>";
                     html += "<td>" + _item[i].title + "</td>"
-                    html += "<td>" + _item[i].confirmUser.userName + "</td>"
+                    html += "<td>" + _item[i].seller.userName + "</td>"
                     html += "<td>" + _item[i].confirmPrice + "</td>"
                     html += "<td>" + _item[i].createdAt + "</td>"
                     html += "<td><button type='button' class='btn btn-danger' id='deleteBtn' value='\"" + _item[i].idx + "\"' data-index='" + _item[i].idx + "\"'>삭제</button></td>";

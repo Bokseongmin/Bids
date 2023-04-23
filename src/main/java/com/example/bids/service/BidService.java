@@ -1,21 +1,17 @@
 package com.example.bids.service;
 
-import com.example.bids.dto.BidDto;
-import com.example.bids.dto.BuyerDto;
-import com.example.bids.dto.CategoryDto;
-import com.example.bids.dto.ItemDto;
+import com.example.bids.dto.*;
 import com.example.bids.entity.*;
 import com.example.bids.entity.UserDto;
-import com.example.bids.repository.BidRepository;
-import com.example.bids.repository.BuyerRepository;
-import com.example.bids.repository.ItemRepository;
-import com.example.bids.repository.UserRepository;
+import com.example.bids.repository.*;
 import com.example.bids.utill.Converter;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.asm.Advice;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.catalog.Catalog;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -36,10 +32,13 @@ public class BidService {
 
     private final BuyerRepository buyerRepository;
 
+    private final ImageRepository imageRepository;
+
     private final Converter converter;
 
     public void start(Map<String, String> map, UserDto userDto) {
         Optional<Item> item = itemRepository.findById(Long.valueOf(map.get("num")));
+        System.out.println(">>>>>>>>>>>" + map);
         LocalDateTime now = LocalDateTime.now();
         int year = now.getYear();
         Month month = now.getMonth();
@@ -62,20 +61,22 @@ public class BidService {
         if (month.getValue() > 12) {
             year++;
         }
-        LocalDateTime enaded = LocalDateTime.of(year, month, day, hour, min, sec);
+        LocalDateTime endedAt = LocalDateTime.of(year, month, day, hour, min, sec);
+        System.out.println("endedAt" + endedAt);
+        System.out.println(endedAt);
         if (item.isPresent()) {
             ItemDto itemDto = converter.item_entityToDto(item.get());
             itemDto.setStatus(1);
             BidDto bidDto = BidDto.builder()
                     .item(converter.item_dtoToEntity(itemDto))
                     .createdAt(LocalDateTime.now())
-                    .endedAt(enaded)
+                    .endedAt(endedAt)
                     .build();
             bidRepository.save(converter.bid_dtoToEntity(bidDto));
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BidDto> main() {
         List<Bid> bids = bidRepository.findTop4ByOrderByBuyerCountDesc();
         List<BidDto> bidDtos = new ArrayList<>();
@@ -83,31 +84,18 @@ public class BidService {
         for (int i = 0; i < bids.size(); i++) {
             Optional<Item> item = itemRepository.findById(bids.get(i).getItem().getIdx());
             if (item.isPresent()) {
-                User seller = item.get().getSeller();
+                CategoryDto categoryDto = converter.category_entityToDto(item.get().getCategory());
+                ItemDto itemDto = converter.item_entityToDto(item.get());
+                UserDto seller = converter.user_entityToDto(item.get().getSeller());
+                itemDto.setSeller(converter.user_dtoToEntity(seller));
+                itemDto.setCategory(converter.category_dtoToEntity(categoryDto));
+
                 BidDto bidDto = BidDto.builder()
                         .idx(bids.get(i).getIdx())
-                        .item(Item.builder()
-                                .idx(item.get().getIdx())
-                                .seller(User.builder()
-                                        .idx(seller.getIdx())
-                                        .userName(seller.getUserName())
-                                        .phoneNo(seller.getPhoneNo())
-                                        .userImg(seller.getUserImg())
-                                        .createdAt(seller.getCreatedAt())
-                                        .build())
-                                .title(item.get().getTitle())
-                                .description(item.get().getDescription())
-                                .startPrice(item.get().getStartPrice())
-                                .confirmUser(item.get().getConfirmUser())
-                                .confirmPrice(item.get().getConfirmPrice())
-                                .itemImages(item.get().getItemImages())
-                                .status(item.get().getStatus())
-                                .createdAt(item.get().getCreatedAt())
-                                .updatedAt(item.get().getUpdatedAt())
-                                .endedAt(item.get().getEndedAt())
-                                .build())
+                        .item(converter.item_dtoToEntity(itemDto))
                         .endedAt(bids.get(i).getEndedAt())
                         .build();
+
                 if (now.compareTo(bidDto.getEndedAt()) > 0) {
                     bidRepository.delete(converter.bid_dtoToEntity(bidDto));
                 } else {
@@ -115,6 +103,7 @@ public class BidService {
                 }
             }
         }
+        System.out.println(bidDtos.toString());
         return bidDtos;
     }
 
@@ -126,32 +115,28 @@ public class BidService {
             Optional<Item> item = itemRepository.findById(bid.get().getItem().getIdx());
             if (item.isPresent()) {
                 User seller = item.get().getSeller();
-                bidDto = BidDto.builder()
-                        .idx(bid.get().getIdx())
-                        .item(Item.builder()
-                                .idx(item.get().getIdx())
-                                .seller(User.builder()
-                                        .idx(seller.getIdx())
-                                        .userName(seller.getUserName())
-                                        .userImg(seller.getUserImg())
-                                        .createdAt(seller.getCreatedAt())
-                                        .build())
-                                .title(item.get().getTitle())
-                                .description(item.get().getDescription())
-                                .startPrice(item.get().getStartPrice())
-                                .confirmUser(item.get().getConfirmUser())
-                                .confirmPrice(item.get().getConfirmPrice())
-                                .itemImages(item.get().getItemImages())
-                                .status(item.get().getStatus())
-                                .createdAt(item.get().getCreatedAt())
-                                .updatedAt(item.get().getUpdatedAt())
-                                .endedAt(item.get().getEndedAt())
-                                .build())
-                        .endedAt(bid.get().getEndedAt())
-                        .build();
+                Category category = item.get().getCategory();
+                ItemDto itemDto = converter.item_entityToDto(item.get());
+                itemDto.setSeller(seller);
+                itemDto.setCategory(category);
+
+                bidDto = converter.bid_entityToDto(bid.get());
+                bidDto.setItem(converter.item_dtoToEntity(itemDto));
             }
         }
+        System.out.println(bidDto.toString());
         return bidDto;
+    }
+
+    @Transactional
+    public ItemDto infoItem(Long idx) {
+        Optional<Item> item = itemRepository.findById(idx);
+        ItemDto itemDto = null;
+        if(item.isPresent()) {
+            itemDto = converter.item_entityToDto(item.get());
+        }
+        System.out.println(itemDto.toString());
+        return itemDto;
     }
 
     @Transactional
@@ -178,5 +163,54 @@ public class BidService {
 
             }
         }
+    }
+
+    @Transactional
+    public List<BidDto> bids() {
+        List<Bid> bids = bidRepository.findAll();
+        List<BidDto> bidDtos = new ArrayList<>();
+        if (bids != null) {
+            for (Bid bid : bids) {
+                BidDto bidDto = converter.bid_entityToDto(bid);
+
+                Item item = (Item) Hibernate.unproxy(bid.getItem());
+                User seller = (User) Hibernate.unproxy(item.getSeller());
+                Category category = (Category) Hibernate.unproxy(item.getCategory());
+
+                ItemDto itemDto = converter.item_entityToDto(bidDto.getItem());
+                itemDto.setSeller(seller);
+                itemDto.setCategory(category);
+                itemDto.setItemImages(item.getItemImages());
+                bidDto.setItem(converter.item_dtoToEntity(itemDto));
+
+                bidDtos.add(bidDto);
+            }
+        }
+        System.out.println(bidDtos.toString());
+        return bidDtos;
+    }
+
+    @Transactional
+    public List<ItemDto> list() {
+        List<Item> items = itemRepository.findAll();
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
+            if (item.getConfirmUser() != null) {
+                UserDto seller = converter.user_entityToDto(item.getSeller());
+                CategoryDto categoryDto = converter.category_entityToDto(item.getCategory());
+                UserDto confirmUser = converter.user_entityToDto(item.getConfirmUser());
+
+                item.setSeller(converter.user_dtoToEntity(seller));
+                item.setCategory(converter.category_dtoToEntity(categoryDto));
+                item.setConfirmUser(converter.user_dtoToEntity(confirmUser));
+
+                List<Image> images = item.getItemImages();
+                item.setItemImages(images);
+
+                itemDtos.add(converter.item_entityToDto(item));
+            }
+        }
+        System.out.println(itemDtos.toString());
+        return itemDtos;
     }
 }

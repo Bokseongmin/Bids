@@ -1,28 +1,23 @@
-package com.example.bids.entity;
+package com.example.bids.dto;
 
+import com.example.bids.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Entity
 @Builder
-public class Image {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idx;
+public class ImageDto {
 
+    private Long idx;
     private String originalFileName;
     private String storedFileName;
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
     private Item item;
 }

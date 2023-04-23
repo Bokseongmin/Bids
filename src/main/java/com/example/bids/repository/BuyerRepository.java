@@ -17,5 +17,6 @@ public interface BuyerRepository extends JpaRepository<Buyer, Long> {
     @Query("SELECT b FROM Buyer b WHERE b.bid.idx = :bidIdx")
     Optional<List<Buyer>> findByBidIdx(@Param("bidIdx") Long bidIdx);
 
-    Optional<Buyer> findByUserIdx(Long userIdx);
+    @Query("SELECT b FROM Buyer b WHERE b.user.idx = :userIdx AND b.bid.idx = :bidIdx")
+    Optional<Buyer> findByUserIdxWithBidIdx(@Param("userIdx") Long userIdx, @Param("bidIdx") Long bidIdx);
 }

@@ -13,8 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +40,13 @@ public class MgmtController {
         return "/pages/mgmt/dashboard";
     }
 
+    @GetMapping("/dashboard/list")
+    @ResponseBody
+    public ResponseEntity get_homeList() {
+
+        return ResponseEntity.ok("");
+    }
+
     @GetMapping("/list")
     public String get_list() {
         return "/pages/mgmt/list";
@@ -53,6 +64,7 @@ public class MgmtController {
     @ResponseBody
     public void post_start(@RequestParam Map<String, String> data, HttpSession session) {
         UserDto userDto = (UserDto) session.getAttribute("user");
+        System.out.println(data.toString());
         bidService.start(data, userDto);
     }
 
@@ -74,11 +86,28 @@ public class MgmtController {
     public String post_bids() {
         return "/";
     }
+
     @GetMapping("/add")
     public String get_add(Model model) {
-        List<CategoryDto> categoryDtos = mgmtService.categoryDtoList();
-        model.addAttribute("category",categoryDtos);
+        List<CategoryDto> categoryDtos = mgmtService.categoryDtos();
+        model.addAttribute("category", categoryDtos);
         return "pages/mgmt/add";
+    }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public ResponseEntity post_add(@RequestPart(value = "key") Map<String, String> data, @RequestPart(value = "file", required = false) List<MultipartFile> itemImages) throws IOException {
+        mgmtService.add(data, itemImages);
+        System.out.println(data);
+        return ResponseEntity.status(HttpStatus.OK).body("");
+    }
+
+    @GetMapping("/add/category")
+    @ResponseBody
+    public ResponseEntity get_category(@RequestParam("parentIdx") String parentIdx) {
+        List<CategoryDto> categoryDtos = mgmtService.get_categoryDtoList(Long.valueOf(parentIdx));
+        System.out.println(categoryDtos.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(categoryDtos);
     }
 
     @GetMapping("/buyer")
@@ -96,15 +125,8 @@ public class MgmtController {
         return ResponseEntity.ok(idx);
     }
 
-    @PostMapping("/add")
-    @ResponseBody
-    public ResponseEntity post_add(@RequestParam Map<String, String> data) {
-        mgmtService.add(data);
-        return ResponseEntity.status(HttpStatus.OK).body("");
-    }
-
     @GetMapping("/t_history")
-    public String get_t_hhistory() {
+    public String get_t_history() {
         return "pages/mgmt/t_history";
     }
 
@@ -119,5 +141,13 @@ public class MgmtController {
     @GetMapping("/b_history")
     public String get_b_history() {
         return "pages/mgmt/b_history";
+    }
+
+    @GetMapping("/b_history/get")
+    @ResponseBody
+    public ResponseEntity get_b_historyGet(HttpSession session) {
+        UserDto userDto = (UserDto) session.getAttribute("user");
+        List<ItemDto> itemDtos = mgmtService.b_history(userDto);
+        return ResponseEntity.ok(itemDtos);
     }
 }

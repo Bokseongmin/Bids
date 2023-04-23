@@ -11,12 +11,59 @@
     <script th:src="@{/js/jquery-3.6.4.min.js}" type="text/javascript"></script>
 </head>
 <body>
-<div class="container py-3">
+<div>
     <div th:replace="/fragments/header.html :: fragment-header"></div>
-    <main>
-
+    <main class="container">
+        <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+            <h1 class="display-4 fw-normal">목록</h1>
+        </div>
+        <div id="list">
+        </div>
     </main>
     <div th:replace="/fragments/footer.html :: fragment-footer"></div>
 </div>
+<script>
+    $(function () {
+        $.ajax({
+            type: "GET",
+            url: "/bid/list",
+            success: function (response) {
+                var _item = response;
+                var html = "<div class=\"row row-cols-1 row-cols-md-4 g-4\">"
+                for (var i = 0; i < _item.length; i++) {
+                    html += "<div class='col' id='item-" + i + "'>";
+                    html += "<div class='card h-100'>";
+                    var itemImages = _item[i].itemImages;
+                    if (itemImages.length > 0) {
+                        var storedFileName = itemImages[0].storedFileName;
+                        html += "<img src='bid/" + storedFileName + "' class='card-img-top' alt='...'>";
+                    } else {
+                        html += "<img src='/image/none-i.png' class='card-img-top' alt='...'>";
+                    }
+                    html += "<div class='card-body'>";
+                    html += "<h5 class='card-title'>" + _item[i].title + "</h5>"
+                    html += "<p class='card-text'>" + _item[i].description + "</p>"
+                    html += "</div>";
+                    html += "<ul class='list-group list-group-flush'>";
+                    html += "<li class='list-group-item'>판매자 : " + _item[i].seller.userName + "</li>";
+                    html += "<li class='list-group-item'>확정가 : " + _item[i].confirmPrice + "</li>";
+                    html += "<li class='list-group-item'>종료</li>";
+                    html += "</ul>";
+                    html += "<div class='card-body'>"
+                    html += "<a href='#' class='card-link'>참여</a>";
+                    html += "<a href='/bid/infoItem?idx=" + _item[i].idx + "' class='card-link'>정보</a>";;
+                    html += "</div>";
+                    html += "</div>";
+                    html += "</div>";
+                }
+                html += "</div>";
+                $("#list").html(html);
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+</script>
 </body>
 </html>
